@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Diáksorsoló és csoportkészítő</title>
+  <style>
+    :root{
+      --bg:#0b0a10;          /* háttér – nagyon sötét lila-fekete */
+      --card:#101018;        /* kártya */
+      --muted:#b9a7d1;       /* tompított szöveg – levendula */
+      --text:#f8f7ff;        /* fő szöveg – törtfehér */
+      --accent:#f97316;      /* narancs – tök */
+      --accent-2:#84cc16;    /* zöld – nyél */
+      --danger:#ef4444;      /* piros */
+      --border:#2a213a;      /* lila szegély */
+      --glow: 0 0 24px rgba(249,115,22,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;padding:24px;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+      background:
+        /* köd */ radial-gradient(1200px 600px at 20% -10%, rgba(255,140,0,.12), transparent 60%),
+        radial-gradient(900px 500px at 120% 10%, rgba(168,85,247,.18), transparent 60%),
+        linear-gradient(180deg,#0b0a10,#120f1b);
+      position:relative;
+      overflow-x:hidden;
+    }
+    /* denevér mintás, finom háttér (SVG data URI) */
+    body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.06;mix-blend-mode:screen;z-index:-1;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='80' viewBox='0 0 160 80'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M20 50c6-10 14-10 20 0 2-4 6-6 10-6-6 8-6 14 0 22-6 0-10-2-10-6-6 10-14 10-20 0-2 4-6 6-10 6 6-8 6-14 0-22 4 0 8 2 10 6z'/%3E%3Cpath d='M100 20c6-10 14-10 20 0 2-4 6-6 10-6-6 8-6 14 0 22-6 0-10-2-10-6-6 10-14 10-20 0-2 4-6 6-10 6 6-8 6-14 0-22 4 0 8 2 10 6z'/%3E%3C/g%3E%3C/svg%3E");background-size:160px 80px;}
+    .wrap{max-width:1000px;margin:0 auto;display:grid;gap:16px;position:relative}
+
+    /* pókháló sarok dísz */
+    .wrap::before,.wrap::after{content:"";position:absolute;width:220px;height:220px;pointer-events:none;opacity:.2;z-index:-1;filter:drop-shadow(0 0 6px rgba(255,255,255,.05));}
+    .wrap::before{top:-12px;left:-12px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M0 0 L200 0 M0 0 L0 200 M0 0 C80 20 140 60 200 100 M0 0 C40 80 80 120 100 200' stroke='%23f97316' stroke-opacity='.7' fill='none'/%3E%3C/svg%3E");}
+    .wrap::after{bottom:-12px;right:-12px;transform:scale(-1);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M0 0 L200 0 M0 0 L0 200 M0 0 C80 20 140 60 200 100 M0 0 C40 80 80 120 100 200' stroke='%23f97316' stroke-opacity='.7' fill='none'/%3E%3C/svg%3E");}
+
+    h1{font-size:clamp(22px,2.8vw,32px);margin:0 0 16px;letter-spacing:.01em;text-shadow:0 2px 0 rgba(0,0,0,.45),0 0 18px rgba(249,115,22,.45)}
+    .title-accent{background:linear-gradient(90deg,var(--accent),#fb923c,#fde68a);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:900px){.grid{grid-template-columns:1.2fr 1fr}}
+
+    .card{background:rgba(16,16,24,.9);border:1px solid var(--border);border-radius:16px;padding:16px;backdrop-filter:blur(8px);box-shadow:0 12px 40px rgba(0,0,0,.35), var(--glow)}
+
+    textarea{width:100%;min-height:260px;background:#0b0a16;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px;resize:vertical;box-shadow:inset 0 0 18px rgba(249,115,22,.06)}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .controls{display:flex;gap:10px;flex-wrap:wrap}
+
+    button{border:1px solid var(--border);background:#181326;color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;transition:.15s transform,.15s background,.15s box-shadow}
+    button:hover{transform:translateY(-1px);background:#1f1830;box-shadow:0 6px 18px rgba(249,115,22,.15)}
+    button.primary{background:var(--accent);border-color:transparent}
+    button.primary:hover{background:#ea580c;box-shadow:var(--glow)}
+    button.success{background:var(--accent-2);border-color:transparent}
+    button.success:hover{background:#65a30d}
+    button.danger{background:var(--danger);border-color:transparent}
+    button.danger:hover{background:#dc2626}
+
+    input[type="number"],select{background:#181326;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 10px;width:110px;box-shadow:inset 0 0 12px rgba(168,85,247,.1)}
+    .muted{color:var(--muted);font-size:13px}
+    .result{display:grid;gap:10px}
+    .group{border:1px dashed var(--border);border-radius:12px;padding:10px;background:linear-gradient(180deg,rgba(249,115,22,.06),rgba(168,85,247,.06))}
+    .group h4{margin:0 0 6px;font-size:14px;color:#fde68a;text-shadow:0 0 8px rgba(168,85,247,.35)}
+    ul{list-style:none;margin:0;padding:0}
+    li{padding:6px 8px;border-radius:8px;background:#0f0a19;border:1px solid #33284a}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#181326;border:1px solid var(--border);font-size:12px;color:#fde68a;box-shadow:0 0 10px rgba(249,115,22,.2) inset}
+    .history{display:flex;gap:6px;flex-wrap:wrap}
+
+    .banner{padding:10px;border:1px solid var(--border);border-radius:12px;background:linear-gradient(90deg,rgba(249,115,22,.12),rgba(168,85,247,.12));box-shadow:inset 0 0 20px rgba(249,115,22,.12)}
+    .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .spacer{flex:1}
+    .kicker{letter-spacing:.08em;text-transform:uppercase;color:#e9d5ff;font-size:12px}
+    .footer{margin-top:6px;color:#d6cff0;font-size:12px}
+  .audio{margin-top:12px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+    .audio .label{font-size:13px;color:var(--muted)}
+    .audio button{padding:8px 12px}
+    .audio input[type="range"]{appearance:none;height:6px;border-radius:999px;background:#241b33;border:1px solid var(--border);width:160px}
+    .audio input[type="range"]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(249,115,22,.6)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="card">
+      <div class="kicker">Egyfájlos eszköz</div>
+      <h1><span class="title-accent">Diáksorsoló és csoportkészítő</span></h1>
+      <p class="muted">Adj meg diákokat soronként vagy vesszővel elválasztva. A lista automatikusan mentésre kerül a böngésződben.</p>
+      <div class="audio" role="region" aria-label="Halloweeni zene vezérlők">
+        <span class="label">Halloweeni háttérzene:</span>
+        <button id="btn-audio" class="primary" aria-pressed="false">Lejátszás</button>
+        <label class="flex" style="gap:6px"><input type="checkbox" id="audio-auto" checked> Induljon az első interakciónál</label>
+        <label class="flex" style="gap:6px">Hangerő <input type="range" id="audio-vol" min="0" max="100" value="15" aria-label="Hangerő"></label>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <label for="names">Diákok</label>
+        <textarea id="names" placeholder="Pl.\nKiss Anna\nNagy Béla\nSzabó Csilla\n…"></textarea>
+        <div class="row" style="margin-top:10px">
+          <div class="controls">
+            <button id="btn-shuffle" class="primary">Véletlen sorrend</button>
+            <button id="btn-pick" class="success">Egy diák sorsolása</button>
+            <button id="btn-clear" class="danger">Lista törlése</button>
+          </div>
+          <div class="spacer"></div>
+          <label class="flex" title="Sorsolásnál kizárt nevek megjegyzése">
+            <input type="checkbox" id="no-repeat"> Nincs ismétlés a sorsolásban
+          </label>
+        </div>
+        <div id="pick-history" class="history" style="margin-top:10px"></div>
+      </section>
+
+      <section class="card">
+        <div class="row">
+          <strong>Csoportkészítés</strong>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <label class="flex"><input type="radio" name="mode" value="size" checked> Csoportlétszám</label>
+          <input type="number" id="group-size" min="2" value="3">
+          <label class="flex"><input type="radio" name="mode" value="count"> Csoportok száma</label>
+          <input type="number" id="group-count" min="2" value="4">
+          <button id="btn-groups" class="primary">Csoportok létrehozása</button>
+        </div>
+        <p class="muted">A diákokat előbb megkeverjük, majd elosztjuk a kiválasztott mód szerint. A „maradék” igazságosan kerül szétosztásra.</p>
+        <div id="groups" class="result"></div>
+      </section>
+    </main>
+
+    <section class="card">
+      <div class="row">
+        <strong>Eredmények</strong>
+        <span id="count" class="badge" title="Aktív nevek száma">0 fő</span>
+      </div>
+      <div id="output" class="banner" style="margin-top:8px;display:none"></div>
+      <div id="order" class="result" style="margin-top:10px"></div>
+      <div class="footer">Tippek: dupla szóközök, üres sorok és ismétlődő vesszők automatikusan tisztításra kerülnek. Mentéshez egyszerűen hagyd megnyitva ezt a fájlt; a böngésző megjegyzi a listát.</div>
+    </section>
+  </div>
+
+  <script>
+    // Globális hibakezelő, hogy azonnal lásd, ha bármi megakad
+    window.addEventListener('error', (e)=>{
+      const el = document.getElementById('output');
+      if(el){ el.style.display='block'; el.textContent = 'Hiba: ' + (e?.message || 'ismeretlen'); }
+    });
+
+    const $ = (sel, ctx=document) => ctx.querySelector(sel);
+    const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+
+    const txt = $('#names');
+    const countBadge = $('#count');
+    const output = $('#output');
+    const orderBox = $('#order');
+    const groupsBox = $('#groups');
+    const noRepeat = $('#no-repeat');
+    const historyBox = $('#pick-history');
+
+    const STORAGE_KEY = 'diaksorsolo_v1_names';
+    const PICKED_KEY = 'diaksorsolo_v1_picked';
+
+    // ---- Util ----
+    function parseNames(raw){
+      return raw
+        .replace(/[;|]/g, ',')
+        .split(/\n|,/)
+        .map(s => s.replace(/\s+/g,' ').trim())
+        .filter(Boolean);
+    }
+
+    function unique(arr){
+      return Array.from(new Set(arr));
+    }
+
+    function shuffle(arr){
+      const a = arr.slice();
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]] = [a[j],a[i]];
+      }
+      return a;
+    }
+
+    function chunkBalanced(arr, k){
+      // Oszd el arr-t k csoportba egyenletesen
+      const groups = Array.from({length:k}, () => []);
+      arr.forEach((item, idx) => groups[idx % k].push(item));
+      return groups;
+    }
+
+    function renderList(target, items, titlePrefix=''){ 
+      target.innerHTML = '';
+      if(!items.length) return;
+      const card = document.createElement('div');
+      const ul = document.createElement('ul');
+      items.forEach((name, i)=>{
+        const li = document.createElement('li');
+        li.textContent = titlePrefix ? `${i+1}. ${name}` : name;
+        ul.appendChild(li);
+      });
+      card.appendChild(ul);
+      target.appendChild(card);
+    }
+
+    function renderGroups(target, groups){
+      target.innerHTML = '';
+      if(!groups.length) return;
+      groups.forEach((g, idx)=>{
+        const div = document.createElement('div');
+        div.className = 'group';
+        const h4 = document.createElement('h4');
+        h4.textContent = `Csoport ${idx+1} (${g.length} fő)`;
+        const ul = document.createElement('ul');
+        g.forEach(n=>{ const li=document.createElement('li'); li.textContent=n; ul.appendChild(li); });
+        div.appendChild(h4); div.appendChild(ul);
+        target.appendChild(div);
+      });
+    }
+
+    function updateCount(){
+      const names = getActiveNames();
+      countBadge.textContent = `${names.length} fő`;
+    }
+
+    function getActiveNames(){
+      let names = parseNames(txt.value);
+      // Sorsolásnál kiszűrjük a már kihúzott neveket, ha be van kapcsolva
+      if (noRepeat.checked){
+        const picked = loadPicked();
+        names = names.filter(n => !picked.includes(n));
+      }
+      return names;
+    }
+
+    function saveNames(){ localStorage.setItem(STORAGE_KEY, txt.value); }
+    function loadNames(){ return localStorage.getItem(STORAGE_KEY) || ''; }
+    function loadPicked(){ try { return JSON.parse(localStorage.getItem(PICKED_KEY) || '[]'); } catch { return []; } }
+    function savePicked(list){ localStorage.setItem(PICKED_KEY, JSON.stringify(list)); }
+
+    function addHistory(name){
+      const chip = document.createElement('span');
+      chip.className = 'badge';
+      chip.textContent = name;
+      historyBox.prepend(chip);
+    }
+
+    function rebuildHistory(){
+      historyBox.innerHTML='';
+      loadPicked().slice().reverse().forEach(addHistory);
+    }
+
+    // ---- Actions ----
+    $('#btn-shuffle').addEventListener('click', () => {
+      const names = getActiveNames();
+      if(!names.length){ toast('Nincs név a listában.'); return; }
+      const mixed = shuffle(names);
+      output.style.display='block';
+      output.textContent = 'Véletlen sorrend elkészült.';
+      renderList(orderBox, mixed, '#');
+    });
+
+    $('#btn-groups').addEventListener('click', () => {
+      const all = parseNames(txt.value);
+      if(!all.length){ toast('Nincs név a listában.'); return; }
+      const mixed = shuffle(all);
+      const mode = $('input[name="mode"]:checked').value;
+      let groups = [];
+      if(mode==='size'){
+        const size = Math.max(2, Number($('#group-size').value||0));
+        const k = Math.max(1, Math.floor((mixed.length + size - 1) / size));
+        groups = chunkBalanced(mixed, k);
+      } else {
+        const k = Math.max(1, Number($('#group-count').value||0));
+        groups = chunkBalanced(mixed, Math.min(k, mixed.length));
+      }
+      output.style.display='block';
+      output.textContent = 'Csoportok létrehozva.';
+      renderGroups(groupsBox, groups);
+    });
+
+    $('#btn-pick').addEventListener('click', () => {
+      const names = getActiveNames();
+      if(!names.length){ toast('Nincs elérhető név a sorsoláshoz.'); return; }
+      const idx = Math.floor(Math.random()*names.length);
+      const chosen = names[idx];
+      output.style.display='block';
+      output.textContent = `Kisorsolt diák: ${chosen}`;
+      addHistory(chosen);
+      if(noRepeat.checked){
+        const picked = loadPicked();
+        if(!picked.includes(chosen)){
+          picked.push(chosen);
+          savePicked(picked);
+        }
+        updateCount();
+      }
+    });
+
+    $('#btn-clear').addEventListener('click', () => {
+      if(confirm('Biztosan törlöd a listát?')){
+        txt.value='';
+        saveNames();
+        updateCount();
+        orderBox.innerHTML='';
+        groupsBox.innerHTML='';
+        output.style.display='none';
+      }
+    });
+
+    function toast(msg){
+      output.style.display='block';
+      output.textContent = msg;
+    }
+
+    // ---- Effects ----
+    txt.addEventListener('input', () => { saveNames(); updateCount(); });
+    noRepeat.addEventListener('change', updateCount);
+
+    // Első betöltés
+    (function init(){
+      txt.value = loadNames();
+      rebuildHistory();
+      updateCount();
+    })();
+    // —— Halloweeni háttérzene (Web Audio, fájl nélküli generált dallam) ——
+    const audioState = { ctx:null, master:null, playing:false, pads:[], loop:null };
+
+    function setupAudio(){
+      if(audioState.ctx) return;
+      const AC = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AC();
+      const master = ctx.createGain();
+      master.gain.value = ($('#audio-vol') ? Number($('#audio-vol').value)/100 : 0.15);
+      master.connect(ctx.destination);
+      audioState.ctx = ctx; audioState.master = master;
+      // Lassan búgó pad – A-moll
+      const A3=220, E3=164.81, C4=261.63;
+      audioState.pads = [A3,E3,C4].map(f=>{
+        const o = ctx.createOscillator(); o.type='sawtooth';
+        const g = ctx.createGain(); g.gain.value=0.02;
+        // finom lebegés
+        const o2 = ctx.createOscillator(); o2.type='sawtooth'; o2.detune.value=7;
+        o.connect(g); o2.connect(g); g.connect(master);
+        o.frequency.value=f; o2.frequency.value=f;
+        o.start(); o2.start();
+        return {o,o2,g};
+      });
+    }
+
+    function startMusic(){
+      setupAudio();
+      const ctx = audioState.ctx; const master = audioState.master;
+      if(audioState.playing){ return; }
+      if(ctx.state === 'suspended'){ ctx.resume(); }
+
+      // Véletlenszerű csilingelő motívumok A-moll skálán
+      const scale = [220, 247, 262, 294, 330, 349, 392, 440];
+      function pluck(freq, t){
+        const o = audioState.ctx.createOscillator(); o.type='triangle';
+        const g = audioState.ctx.createGain(); g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.18, t+0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t+0.5);
+        const filt = audioState.ctx.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=1800;
+        o.connect(filt).connect(g).connect(master);
+        o.frequency.setValueAtTime(freq, t);
+        o.start(t); o.stop(t+0.6);
+      }
+      audioState.loop = setInterval(()=>{
+        const now = ctx.currentTime;
+        // kis ritmus: 2-3 hang véletlenül
+        const n = 2 + Math.floor(Math.random()*2);
+        for(let i=0;i<n;i++){
+          const f = scale[Math.floor(Math.random()*scale.length)] * (Math.random()<.2?2:1);
+          pluck(f, now + i*0.18);
+        }
+        // néha magas csilingelés
+        if(Math.random()<0.25) pluck(880, now+0.55);
+      }, 1100);
+
+      audioState.playing = true;
+      const btn = $('#btn-audio'); if(btn){ btn.textContent='Szünet'; btn.setAttribute('aria-pressed','true'); btn.classList.remove('primary'); btn.classList.add('danger'); }
+    }
+
+    function stopMusic(){
+      if(!audioState.playing) return;
+      clearInterval(audioState.loop); audioState.loop=null;
+      // padok némítása
+      audioState.pads.forEach(p=>{ try{ p.o.stop(); p.o2.stop(); }catch{} });
+      audioState.pads = [];
+      audioState.playing = false;
+      const btn = $('#btn-audio'); if(btn){ btn.textContent='Lejátszás'; btn.setAttribute('aria-pressed','false'); btn.classList.add('primary'); btn.classList.remove('danger'); }
+    }
+
+    function toggleMusic(){ audioState.playing ? stopMusic() : startMusic(); }
+    function ensureMusicStart(){ const auto = $('#audio-auto'); if(auto && auto.checked) startMusic(); }
+
+    // UI események
+    document.addEventListener('click', (e)=>{
+      if(e.target && e.target.id === 'btn-audio'){ toggleMusic(); }
+    });
+    const vol = $('#audio-vol'); if(vol){ vol.addEventListener('input', ()=>{ if(audioState.master){ audioState.master.gain.value = Number(vol.value)/100; } }); }
+
+    // első interakciónál indulhat
+    ['btn-shuffle','btn-groups','btn-pick'].forEach(id=>{ const el = document.getElementById(id); if(el){ el.addEventListener('click', ensureMusicStart, { once:true }); }});
+    if(txt){ txt.addEventListener('focus', ensureMusicStart, { once:true }); }
+
+</script>
+  <script>
+    // —— KOMPATIBILITÁSI JAVÍTÁSOK A HANGHOZ ——
+    (function(){
+      const btn = document.getElementById('btn-audio');
+      const autoChk = document.getElementById('audio-auto');
+      const out = document.getElementById('output');
+
+      async function resumeCtx(){
+        try{
+          if(!audioState.ctx){ setupAudio(); }
+          if(audioState.ctx.state !== 'running'){
+            await audioState.ctx.resume();
+          }
+        }catch(e){ if(out){ out.style.display='block'; out.textContent = 'Hang indítási hiba: '+ (e?.message||e); } }
+      }
+
+      function userUnlock(){
+        // iOS/Safari: lejátszás feloldása
+        try{
+          if(!audioState.ctx){ setupAudio(); }
+          const ctx = audioState.ctx;
+          const src = ctx.createBufferSource();
+          src.buffer = ctx.createBuffer(1, 1, ctx.sampleRate); // 1 frame csend
+          src.connect(audioState.master);
+          src.start(0);
+        }catch{}
+      }
+
+      function tryAutoStart(){
+        if(autoChk && autoChk.checked && !audioState.playing){ startMusic(); }
+      }
+
+      // Globális első interakció feloldás
+      let unlocked = false;
+      ['pointerdown','touchstart','keydown'].forEach(ev=>{
+        window.addEventListener(ev, async ()=>{
+          if(unlocked) return; unlocked = true;
+          await resumeCtx(); userUnlock(); tryAutoStart();
+        }, { once:true, passive:true });
+      });
+
+      // Láthatóságváltáskor próbáljuk újra
+      document.addEventListener('visibilitychange', async ()=>{
+        if(document.visibilityState==='visible' && audioState.playing){
+</html>
